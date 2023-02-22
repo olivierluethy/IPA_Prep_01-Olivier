@@ -1,0 +1,102 @@
+* {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+body main {
+  margin-top: 7rem;
+  margin-left: 218px;
+  text-align: center;
+}
+body main .loginBtn {
+  background-color: black;
+  border: 1px solid black;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 25px;
+  margin: 4px 2px;
+  padding: 16px 32px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  outline: none;
+}
+body main .loginBtn:hover {
+  transform: scale(1.09);
+}
+body main .menu {
+  display: flex;
+}
+body main .menu button {
+  background-color: #4CAF50;
+  border: 1px solid black;
+  border-radius: 25px;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 25px;
+  margin: 4px 2px;
+  padding: 16px 32px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  outline: none;
+}
+body main .menu button:hover {
+  transform: scale(1.05);
+}
+body main .menu button:nth-child(1) {
+  background: rgb(230, 230, 230);
+  background: linear-gradient(90deg, rgb(230, 230, 230) 0%, rgb(115, 115, 115) 100%);
+  box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  margin-right: 2rem;
+  width: 38%;
+  color: black;
+}
+body main .menu button:nth-child(1) .grid-container {
+  display: grid;
+  flex-wrap: wrap;
+  grid-template-columns: auto auto;
+  width: 100%;
+}
+body main .menu button:nth-child(1) .grid-container > div {
+  text-align: center;
+}
+body main .menu button:nth-child(1) .grid-container > div img {
+  width: 130px;
+}
+body main .menu button:nth-child(2) {
+  background: rgb(115, 115, 115);
+  background: linear-gradient(90deg, rgb(115, 115, 115) 0%, rgb(48, 48, 48) 100%);
+  box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  width: 40%;
+}
+body main .menu button:nth-child(2) .grid-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  width: 100%;
+}
+body main .menu button:nth-child(2) .grid-container > div {
+  text-align: center;
+}
+body main .menu button:nth-child(2) .grid-container > div img {
+  width: 130px;
+}
+body main .menu button:nth-child(2) img {
+  filter: invert(100%);
+}
+body main h2 {
+  text-align: left;
+  font-size: 2rem;
+}
+
+@media (max-width: 900px) {
+  body main .menu {
+    display: block;
+  }
+}/*# sourceMappingURL=home.css.map */
