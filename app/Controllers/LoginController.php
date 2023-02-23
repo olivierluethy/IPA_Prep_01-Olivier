@@ -72,17 +72,8 @@ class LoginController
 				// If the user is not in the database, add them
 				else {
 					try {
-						$query = "INSERT INTO benutzer (email, first_name, last_name, gender, full_name, picture, verifiedEmail, token, role) VALUES (':email', ':first_name', ':last_name', ':gender', ':full_name', ':picture', ':verifiedEmail', ':token', 0)";
-						$stmt = $conn->prepare($query);
-						$stmt->bindParam(':email', $email);
-						$stmt->bindParam(':first_name', $firstName);
-						$stmt->bindParam(':last_name', $lastName);
-						$stmt->bindParam(':gender', $gender);
-						$stmt->bindParam(':full_name', $name);
-						$stmt->bindParam(':picture', $profileImageUrl);
-						$stmt->bindParam(':verifiedEmail', $verifiedEmail);
-						$stmt->bindParam(':token', $token);
-						$stmt->execute();
+
+						$login->addUser($email, $firstName, $lastName, $gender, $name, $profileImageUrl, $verifiedEmail, $token);
 
                         header("Location: home");
                         exit();

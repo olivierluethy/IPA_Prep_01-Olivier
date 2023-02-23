@@ -19,8 +19,7 @@ class Login
     // If the user is not in the database, add them
     public function addUser($email, $firstName, $lastName, $gender, $name, $profileImageUrl, $verifiedEmail, $token){
         $statement = $this->db->prepare("INSERT INTO benutzer (email, first_name, last_name, gender, full_name, picture, verifiedEmail, token, role) 
-        VALUES (':email', ':first_name', ':last_name', ':gender', ':full_name', ':picture', ':verifiedEmail', ':token', 0)");
-
+        VALUES (:email, :first_name, :last_name, :gender, :full_name, :picture, :verifiedEmail, :token, 0)");
         $statement->bindParam(':email', $email);
         $statement->bindParam(':first_name', $firstName);
         $statement->bindParam(':last_name', $lastName);
