@@ -38,18 +38,14 @@ class LoginController
         
             // Connect to the database
 			try {
-				$conn = new PDO("mysql:host=localhost;dbname=journal", "root", "");
-				$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-				
-				// Check if the user exists in the database
-				$query = "SELECT * FROM benutzer WHERE email = :email";
-				$stmt = $conn->prepare($query);
-				$stmt->bindParam(':email', $email);
-				$stmt->execute();
-				$user = $stmt->fetch();
+				$login = new Login();
+                $userExists = $login->doesUserExist($email);
+
+                error_reporting(E_ALL);
+                ini_set('display_errors', '1');
 
 				// If the user exists, get all the information from the database
-				if ($user) {
+				if ($userExists) {
 					$firstName = $user['first_name'];
 					$lastName = $user['last_name'];
 					$gender = $user['gender'];

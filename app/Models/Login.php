@@ -10,11 +10,11 @@ class Login
 
     // Check if the user exists in the database
 	public function doesUserExist($email){
-		$statement = $this->db->prepare('SELECT * FROM benutzer WHERE email = :email');
+        $statement = $this->db->prepare('SELECT * FROM benutzer WHERE email = :email');
         $statement->bindParam(':email', $email, PDO::PARAM_STR);
-		$statement->execute();
-        return $statement;
-	}
+        $statement->execute();
+        return $statement->rowCount() > 0;
+    }    
 
     // If the user is not in the database, add them
     public function addUser($email, $firstName, $lastName, $gender, $name, $profileImageUrl, $verifiedEmail, $token){
