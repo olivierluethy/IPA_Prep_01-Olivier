@@ -38,8 +38,11 @@ $routes = [
 	'useroverview' => 'AdminController@useroverview',
 
 	/* Für alle */
-	'logout' => 'JournalController@logout',
-	'login' => 'JournalController@login',
+	'logout' => 'LoginController@logout',
+	'login' => 'LoginController@login',
+
+	'addUser' => 'LoginController@addUser',
+	'doesUserExist' => 'LoginController@doesUserExist',
 ];
 
 $db = [

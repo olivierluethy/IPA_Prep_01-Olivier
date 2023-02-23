@@ -109,9 +109,10 @@ if(isset($_SESSION['role'])){
         </div>
         <div></div>
         <div>
-            <img src="" alt="">
             <?php
-            if(isset($_SESSION['id'])){?>
+            if(isset($_SESSION['role'])){
+                echo '<img src="' . $_SESSION['profileImageUrl'] . '" class="user-image" />';
+                ?>
                 <h2>Hey, <?= $_SESSION['full_name'] ?>!</h2>
             <?php } ?>
         </div>
