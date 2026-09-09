@@ -41,8 +41,14 @@ $picture = ($user['picture'] ?? '') !== '' ? $user['picture'] : avatarDataUri($u
                         <div class="relative">
                             <i class="fa-solid fa-link pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                             <input type="url" id="pictureUrl" name="picture_url" placeholder="Oder Bild-URL einfügen (https://…)"
-                                   class="w-full rounded-lg border border-slate-300 py-2.5 pl-9 pr-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+                                   class="w-full rounded-lg border border-slate-300 py-2.5 pl-9 pr-11 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+                            <button type="button" id="pasteUrlBtn" title="Bild-URL aus Zwischenablage einfügen"
+                                    aria-label="Bild-URL aus Zwischenablage einfügen"
+                                    class="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-brand-50 hover:text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100">
+                                <i class="fa-solid fa-paste"></i>
+                            </button>
                         </div>
+                        <p id="pasteUrlHint" class="hidden text-xs" aria-live="polite"></p>
                     </div>
                 </div>
             </div>
@@ -156,6 +162,51 @@ $picture = ($user['picture'] ?? '') !== '' ? $user['picture'] : avatarDataUri($u
     preview.addEventListener('error', function () {
         if (preview.src !== fallback) preview.src = fallback;
     });
+
+    // Bild-URL aus der Zwischenablage einfügen (nur nach Klick, HTTPS/localhost).
+    var pasteBtn  = document.getElementById('pasteUrlBtn');
+    var pasteHint = document.getElementById('pasteUrlHint');
+    var hintTimer;
+
+    function showHint(msg, ok) {
+        if (!pasteHint) return;
+        pasteHint.textContent = msg;
+        pasteHint.classList.remove('hidden', 'text-emerald-600', 'text-slate-500');
+        pasteHint.classList.add(ok ? 'text-emerald-600' : 'text-slate-500');
+        clearTimeout(hintTimer);
+        hintTimer = setTimeout(function () { pasteHint.classList.add('hidden'); }, 3000);
+    }
+
+    function isHttpUrl(value) {
+        try {
+            var u = new URL(value);
+            return u.protocol === 'http:' || u.protocol === 'https:';
+        } catch (err) {
+            return false;
+        }
+    }
+
+    if (pasteBtn && url) {
+        pasteBtn.addEventListener('click', function () {
+            if (!navigator.clipboard || !navigator.clipboard.readText) {
+                showHint('Zwischenablage kann in diesem Browser nicht gelesen werden.', false);
+                return;
+            }
+            navigator.clipboard.readText().then(function (text) {
+                var v = (text || '').trim();
+                if (v && isHttpUrl(v)) {
+                    url.value = v;
+                    // Bestehende Logik übernehmen (Datei-Auswahl zurücksetzen + Vorschau).
+                    url.dispatchEvent(new Event('input', { bubbles: true }));
+                    showHint('URL eingefügt.', true);
+                } else {
+                    showHint('Keine gültige Bild-URL in der Zwischenablage gefunden.', false);
+                }
+            }).catch(function () {
+                showHint('Keine gültige Bild-URL in der Zwischenablage gefunden.', false);
+            });
+        });
+    }
 
     if (dz) {
         ['dragenter', 'dragover'].forEach(function (ev) {
