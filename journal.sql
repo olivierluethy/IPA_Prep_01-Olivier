@@ -16,6 +16,7 @@ CREATE TABLE benutzer (
   `picture` varchar(255) NOT NULL DEFAULT '',
   `verifiedEmail` int(11) NOT NULL DEFAULT 0,
   `token` varchar(255) NOT NULL DEFAULT '',
+  `password` varchar(255) NOT NULL DEFAULT '', /* bcrypt-Hash für die normale E-Mail/Passwort-Anmeldung (leer bei Google-Konten) */
   `role` TINYINT(2) NOT NULL, /* Lernender: 0, Fachkraft: 1, Administrator: 2 */
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 );

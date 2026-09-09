@@ -41,6 +41,10 @@ $routes = [
 	'logout' => 'LoginController@logout',
 	'login' => 'LoginController@login',
 
+	/* Normale E-Mail/Passwort-Anmeldung */
+	'register' => 'LoginController@register',
+	'authenticate' => 'LoginController@authenticate',
+
 	'addUser' => 'LoginController@addUser',
 	'doesUserExist' => 'LoginController@doesUserExist',
 ];
