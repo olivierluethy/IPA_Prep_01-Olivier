@@ -203,6 +203,7 @@ class LoginController
         $fullName = $user['full_name'] !== '' ? $user['full_name'] : trim($user['first_name'] . ' ' . $user['last_name']);
         $picture  = $user['picture'] !== '' ? $user['picture'] : avatarDataUri($fullName);
 
+        $_SESSION['id']              = (int) $user['benutzerId'];
         $_SESSION['email']           = $user['email'];
         $_SESSION['first_name']      = $user['first_name'];
         $_SESSION['last_name']       = $user['last_name'];

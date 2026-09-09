@@ -17,8 +17,8 @@ class Admin
 
     public function editUser($id, $role){
         $statement = $this->db->prepare('UPDATE benutzer SET role = :role WHERE benutzerId = :id');
-        $statement->bindParam(':role', $role, PDO::PARAM_STR);
-		$statement->bindParam(':id', $id, PDO::PARAM_STR);
+        $statement->bindValue(':role', (int) $role, PDO::PARAM_INT);
+		$statement->bindValue(':id', (int) $id, PDO::PARAM_INT);
 		$statement->execute();
     }
 

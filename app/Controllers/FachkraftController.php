@@ -1,31 +1,38 @@
 <?php
 
-use Google\Service\Classroom\Topic;
-
 class FachkraftController
 {
-    public function overview(){		
-		require_once 'app/Views/general/config.php';
+    public function overview()
+    {
+        requireRole([1]);
 
-		if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-			if($_SESSION['role'] == 1){
-				$Fachkraft = new Fachkraft();
-				$Keyword = new Keyword();
-						
-				/* Get all daily rapports */
-				$arrayDailyRaports = $Fachkraft->getDailyRaports()->fetchAll();
+        $q    = trim((string) ($_GET['q'] ?? ''));
+        $type = $_GET['type'] ?? 'all';
+        if (!in_array($type, ['all', 'daily', 'weekly'], true)) {
+            $type = 'all';
+        }
 
-				/* Get all weekly rapports */
-				$arrayWeeklyRaports = $Fachkraft->getWeeklyRaports()->fetchAll();
+        $Fachkraft = new Fachkraft();
+        $arrayDailyRaports  = $Fachkraft->getDailyRaports()->fetchAll(PDO::FETCH_ASSOC);
+        $arrayWeeklyRaports = $Fachkraft->getWeeklyRaports()->fetchAll(PDO::FETCH_ASSOC);
+        $arrayLernende      = $Fachkraft->getAllLernende()->fetchAll(PDO::FETCH_ASSOC);
 
-				/* Get all apprentices */
-				$arrayLernende = $Fachkraft->getAllLernende()->fetchAll();
+        if ($q !== '') {
+            $needle = mb_strtolower($q);
 
-				/* Get all keywords */
-				$arrayTopics = $Keyword->getAllKeywords()->fetchAll();
-				
-				require 'app/Views/fachkraft/overview.view.php';
-			}
-		}
-	}
+            $arrayDailyRaports = array_values(array_filter($arrayDailyRaports, function ($r) use ($needle) {
+                $name = mb_strtolower((string) ($r['full_name'] ?? ''));
+                $text = mb_strtolower((string) ($r['text'] ?? ''));
+                return strpos($name, $needle) !== false || strpos($text, $needle) !== false;
+            }));
+
+            $arrayWeeklyRaports = array_values(array_filter($arrayWeeklyRaports, function ($r) use ($needle) {
+                $name = mb_strtolower((string) ($r['full_name'] ?? ''));
+                $work = mb_strtolower((string) ($r['erledigte_arbeiten'] ?? ''));
+                return strpos($name, $needle) !== false || strpos($work, $needle) !== false;
+            }));
+        }
+
+        require 'app/Views/fachkraft/overview.view.php';
+    }
 }

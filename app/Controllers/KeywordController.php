@@ -2,82 +2,79 @@
 
 class KeywordController
 {
-    public function keywords(){		
-		require_once 'app/Views/general/config.php';
+    public function keywords()
+    {
+        requireRole([0]);
 
-		if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-			$Keyword = new Keyword();
-		
-			$arrayKeywords = $Keyword->getAllKeywords()->fetchAll();
-			
-			require 'app/Views/lernender/mykeywords.view.php';	
-		}else {
-			header("Location: login");
-		}
-	}
+        $arrayKeywords = (new Keyword())->getAllKeywords()->fetchAll(PDO::FETCH_ASSOC);
 
-	public function addkeyword(){
-		require_once 'app/Views/general/config.php';
+        require 'app/Views/lernender/mykeywords.view.php';
+    }
 
-		if (!isset($_SESSION['user_token'])) {
-			header("Location: login");
-			die();
-		}else{
-			$Keyword = new Keyword();
+    public function addkeyword()
+    {
+        requireRole([0]);
 
-			if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-				$thema = e(post('thema'));
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $thema = trim((string) post('thema'));
 
-				$Keyword->add_keywords($thema);
-	
-				header('Location: keywords');
-			}
+            if ($thema === '') {
+                setFlash('error', 'Bitte gib einen Namen für das Keyword ein.');
+                header('Location: addkeyword');
+                exit;
+            }
 
-			require 'app/Views/lernender/addkeyword.view.php';
-		}
-	}
+            (new Keyword())->add_keywords($thema);
 
-	public function editkeywords(){
-		require_once 'app/Views/general/config.php';
+            setFlash('success', 'Keyword hinzugefügt.');
+            header('Location: keywords');
+            exit;
+        }
 
-		if (!isset($_SESSION['user_token'])) {
-			header("Location: login");
-			die();
-		}else{
-			$id = $_GET['id'];
+        require 'app/Views/lernender/addkeyword.view.php';
+    }
 
-			$Keyword = new Keyword();
+    public function editkeywords()
+    {
+        requireRole([0]);
 
-			if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-				$titel = e(post('thema'));
-			
-				$Keyword->editKeyword($id, $titel);
+        $id = (int) ($_GET['id'] ?? 0);
+        $Keyword = new Keyword();
 
-				header('Location: keywords');	
-			}else{
-				/* Get Data to edit */
-				$getKeyword = $Keyword -> getKeyword($id)->fetchAll();
-			}
-			require 'app/Views/lernender/editKeyword.view.php';
-		}
-	}
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $titel = trim((string) post('thema'));
 
-	public function deleteKeyword(){
-		require_once 'app/Views/general/config.php';
+            if ($titel === '') {
+                setFlash('error', 'Der Keyword-Name darf nicht leer sein.');
+                header('Location: editKeyword?id=' . $id);
+                exit;
+            }
 
-		if (!isset($_SESSION['user_token'])) {
-			header("Location: login");
-			die();
-		}else{
-			$Keyword = new Keyword();
-			$pdo = connectDatabase();
-			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $Keyword->editKeyword($id, $titel);
 
-			$id = $_GET['id'];
+            setFlash('success', 'Keyword aktualisiert.');
+            header('Location: keywords');
+            exit;
+        }
 
-			$Keyword->deleteKeyword($id);
-			
-			header('Location: keywords');
-		}
-	}
+        $getKeyword = $Keyword->getKeyword($id)->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($getKeyword)) {
+            setFlash('error', 'Dieses Keyword wurde nicht gefunden.');
+            header('Location: keywords');
+            exit;
+        }
+
+        require 'app/Views/lernender/editKeyword.view.php';
+    }
+
+    public function deleteKeyword()
+    {
+        requireRole([0]);
+        $id = (int) ($_GET['id'] ?? 0);
+        (new Keyword())->deleteKeyword($id);
+
+        setFlash('success', 'Keyword gelöscht.');
+        header('Location: keywords');
+        exit;
+    }
 }

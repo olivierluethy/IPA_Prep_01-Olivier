@@ -2,3 +2,7 @@ vendor/
 
 # Lokaler Dev-Router für den PHP-Built-in-Server (kein Teil der App)
 _dev_router.php
+
+# Hochgeladene Profilbilder (nicht versionieren, Ordner aber behalten)
+public/uploads/*
+!public/uploads/.gitkeep

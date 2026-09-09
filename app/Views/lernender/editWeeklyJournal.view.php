@@ -1,59 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+$page = ['active' => 'weeklyraport', 'title' => 'Wochenbericht bearbeiten', 'icon' => 'fa-calendar-week'];
+require __DIR__ . '/../general/head.php';
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="public/css/dailyweeklyreport.css">
-    <link rel="stylesheet" href="public/css/navside.css">
-    <link rel="stylesheet" href="public/fontawesome/css/all.css">
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <title>Journal - Edit Weekly Journal</title>
-</head>
-
-<body>
-    <?php
-$actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
-include(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "General" . DIRECTORY_SEPARATOR . "navside.view.php");
+$report = $getWeeklyReport[0];
 ?>
 
-    <main>
-        <form action="editWeeklyRaport?id=<?= $getWeeklyReport[0][0] ?>" method="POST">
-            <h2>Calendar week:</h2>
-            <input type="number" name="calendar_week" id="calendar_week" min="1" max="52"
-                value="<?= $getWeeklyReport[0][1] ?>"><br><br><br><br>
+<a href="weeklyraport" class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-brand-600">
+    <i class="fa-solid fa-arrow-left"></i> Zurück zu den Wochenberichten
+</a>
 
-            <h2>Completed tasks:</h2>
-            <textarea name="completed_tasks" id="completed_tasks" cols="30" rows="10"
-                placeholder="For example: I have completed ..."><?php echo $getWeeklyReport[0][2] ?></textarea>
+<form action="editWeeklyRaport?id=<?= (int) $report['wochenreportId'] ?>" method="POST" class="space-y-6">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+        <label for="calendar_week" class="mb-1.5 block text-sm font-medium text-slate-700">Kalenderwoche</label>
+        <input type="number" name="calendar_week" id="calendar_week" min="1" max="53" required
+               value="<?= (int) $report['kalenderwoche'] ?>"
+               placeholder="z. B. 34"
+               class="w-full max-w-[10rem] rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+        <p class="mt-2 text-xs text-slate-400">Die Kalenderwoche, die dieser Bericht abdeckt (1–53).</p>
+    </div>
 
-            <h2>Still in work:</h2>
-            <textarea name="still_in_work" id="still_in_work" cols="30" rows="10"
-                placeholder="For example: I'm still working on ..."><?php echo $getWeeklyReport[0][3] ?></textarea>
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+        <label for="editor_completed_tasks" class="mb-2 block text-sm font-medium text-slate-700">Erledigte Arbeiten</label>
+        <textarea name="completed_tasks" id="editor_completed_tasks" rows="8"><?= richtext($report['erledigte_arbeiten']) ?></textarea>
+        <p class="mt-2 text-xs text-slate-400">Was hast du diese Woche abgeschlossen?</p>
+    </div>
 
-            <h2>Reflection:</h2>
-            <textarea name="reflection" id="reflection" cols="30" rows="10"
-                placeholder="For example: It was ..."><?php echo $getWeeklyReport[0][4] ?></textarea>
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+        <label for="editor_still_in_work" class="mb-2 block text-sm font-medium text-slate-700">Laufende Arbeiten</label>
+        <textarea name="still_in_work" id="editor_still_in_work" rows="8"><?= richtext($report['laufende_arbeiten']) ?></textarea>
+        <p class="mt-2 text-xs text-slate-400">Woran arbeitest du aktuell noch?</p>
+    </div>
 
-            <h2>Issues:</h2>
-            <textarea name="issues" id="issues" cols="30" rows="10"
-                placeholder="For example: I had problems with ..."><?php echo $getWeeklyReport[0][5] ?></textarea><br>
-            <input type="submit" class="send" value="+ Add Weekly Report">
-        </form>
-    </main>
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+        <label for="editor_reflection" class="mb-2 block text-sm font-medium text-slate-700">Reflexion</label>
+        <textarea name="reflection" id="editor_reflection" rows="8"><?= richtext($report['reflexion']) ?></textarea>
+        <p class="mt-2 text-xs text-slate-400">Was hast du gelernt? Was ist dir gut gelungen?</p>
+    </div>
 
-    <script src="public/js/app.js"></script>
-    <script src="ckeditor/ckeditor.js"></script>
-    <script src="public/js/route.js"></script>
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+        <label for="editor_issues" class="mb-2 block text-sm font-medium text-slate-700">Aufgetretene Probleme</label>
+        <textarea name="issues" id="editor_issues" rows="8"><?= richtext($report['aufgetretene_probleme']) ?></textarea>
+        <p class="mt-2 text-xs text-slate-400">Welche Schwierigkeiten sind aufgetreten und wie bist du damit umgegangen?</p>
+    </div>
 
-    <script>
-    CKEDITOR.replace('completed_tasks');
-    CKEDITOR.replace('still_in_work');
-    CKEDITOR.replace('reflection');
-    CKEDITOR.replace('issues');
-    </script>
+    <div class="flex items-center justify-end gap-3">
+        <a href="weeklyraport" class="rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100">Abbrechen</a>
+        <button type="submit"
+                class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700">
+            <i class="fa-solid fa-floppy-disk"></i> Änderungen speichern
+        </button>
+    </div>
+</form>
 
-</body>
+<script src="ckeditor/ckeditor.js"></script>
+<script>
+    if (window.CKEDITOR) {
+        CKEDITOR.replace('editor_completed_tasks', { height: 240, removePlugins: 'elementspath', resize_enabled: false });
+        CKEDITOR.replace('editor_still_in_work',   { height: 240, removePlugins: 'elementspath', resize_enabled: false });
+        CKEDITOR.replace('editor_reflection',      { height: 240, removePlugins: 'elementspath', resize_enabled: false });
+        CKEDITOR.replace('editor_issues',          { height: 240, removePlugins: 'elementspath', resize_enabled: false });
+    }
+</script>
 
-</html>
+<?php require __DIR__ . '/../general/foot.php'; ?>

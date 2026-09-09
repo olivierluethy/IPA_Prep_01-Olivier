@@ -1,52 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+$page = ['active' => 'overview', 'title' => 'Wochenbericht', 'icon' => 'fa-calendar-week'];
+require __DIR__ . '/../general/head.php';
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="public/css/dailyweeklyreport.css">
-    <link rel="stylesheet" href="public/css/navside.css">
-    <link rel="stylesheet" href="public/fontawesome/css/all.css">
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <title>Journal - Overview</title>
-</head>
-
-<body>
-    <?php
-$actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
-include ("general/navside.view.php");
+$week = $weekArray[0] ?? null;
 ?>
 
-    <main>
-        <h2>Calendar week:</h2>
-        <p><?= $weekArray[0][1] ?></p>
+<a href="overview" class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-brand-600">
+    <i class="fa-solid fa-arrow-left"></i> Zurück zur Übersicht
+</a>
 
-        <h2>Completed tasks:</h2>
-        <textarea name="completed_tasks" id="completed_tasks" cols="30" rows="10" readonly><?= $weekArray[0][2] ?></textarea>
+<?php if (!$week): ?>
+    <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+        <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+            <i class="fa-solid fa-calendar-week text-lg"></i>
+        </span>
+        <h3 class="mt-4 font-medium text-ink">Wochenbericht nicht gefunden</h3>
+        <p class="mx-auto mt-1 max-w-sm text-sm text-slate-500">Dieser Bericht existiert nicht oder wurde entfernt.</p>
+    </div>
+<?php else: ?>
+    <!-- Kopf -->
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                <i class="fa-solid fa-calendar-week"></i>
+            </span>
+            <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                    <p class="font-medium text-ink"><?= e($week['full_name'] ?? '') ?></p>
+                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-600">KW <?= (int) ($week['kalenderwoche'] ?? 0) ?></span>
+                </div>
+                <p class="text-sm text-slate-400"><?= e(formatDate($week['datum'] ?? '')) ?></p>
+            </div>
+            <?= statusBadge((int) ($week['status'] ?? 0)) ?>
+        </div>
+    </div>
 
-        <h2>Still in work:</h2>
-        <textarea name="still_in_work" id="still_in_work" cols="30" rows="10" readonly><?= $weekArray[0][3] ?></textarea>
+    <?php
+    $sections = [
+        ['Erledigte Arbeiten',    'fa-list-check',        $week['erledigte_arbeiten']   ?? ''],
+        ['Laufende Arbeiten',     'fa-spinner',           $week['laufende_arbeiten']    ?? ''],
+        ['Reflexion',             'fa-lightbulb',         $week['reflexion']            ?? ''],
+        ['Aufgetretene Probleme', 'fa-triangle-exclamation', $week['aufgetretene_probleme'] ?? ''],
+    ];
+    ?>
+    <div class="space-y-6">
+        <?php foreach ($sections as [$label, $icon, $content]): ?>
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+                <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
+                    <i class="fa-solid <?= $icon ?>"></i> <?= e($label) ?>
+                </h2>
+                <?php if (trim(strip_tags((string) $content)) === ''): ?>
+                    <p class="text-sm italic text-slate-400">Keine Angaben.</p>
+                <?php else: ?>
+                    <div class="prose-journal"><?= richtext($content) ?></div>
+                <?php endif; ?>
+            </section>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 
-        <h2>Reflecion:</h2>
-        <textarea name="reflection" id="reflection" cols="30" rows="10" readonly><?= $weekArray[0][4] ?></textarea>
-
-        <h2>Issues</h2>
-        <textarea name="issues" id="issues" cols="30" rows="10" readonly><?= $weekArray[0][5] ?></textarea>
-
-    </main>
-
-    <script src="public/js/app.js"></script>
-    <script src="ckeditor/ckeditor.js"></script>
-    <script src="public/js/route.js"></script>
-
-    <script>
-    CKEDITOR.replace('completed_tasks');
-    CKEDITOR.replace('still_in_work');
-    CKEDITOR.replace('reflection');
-    CKEDITOR.replace('issues');
-    </script>
-
-</body>
-
-</html>
+<?php require __DIR__ . '/../general/foot.php'; ?>

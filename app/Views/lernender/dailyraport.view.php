@@ -1,69 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="public/css/dailyweeklyreport.css">
-    <link rel="stylesheet" href="public/css/navside.css">
-    <link rel="stylesheet" href="public/fontawesome/css/all.css">
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <title>Journal - Daily Raport</title>
-</head>
-
-<body>
-    <button id="burger" onclick="toggleSidebar()">&#9776;</button>
-
-    <?php
-$actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
-include(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "General" . DIRECTORY_SEPARATOR . "navside.view.php");
+<?php
+$page = ['active' => 'dailyraport', 'title' => 'Tagesberichte', 'icon' => 'fa-calendar-day'];
+require __DIR__ . '/../general/head.php';
 ?>
 
-    <main>
-        <div class="withData">
-        <?php
-if ($_SESSION['role'] == 0) {
-    // Lernender view
-    if (count($arrayJournalsInProcess) > 0 || count($arrayJournalIsReleased) > 0) {
-        if (count($arrayJournalsInProcess) > 0) {
-            echo "<h2>Still in process</h2>";
-            foreach ($arrayJournalsInProcess as $journalInProcess) {
-                $date = date('dS M Y', strtotime($journalInProcess['datum']));
-                echo "<div class='grid-container'>
-                          <div>Report from the $date</div>
-                          <div><button class='btn1' onclick='editDailyReport({$journalInProcess["journalId"]})'><i class='fas fa-edit'></i> Edit</button></div>
-                          <div><button class='btn2' onclick='deleteDailyReport({$journalInProcess["journalId"]})'><i class='fas fa-trash'></i> Delete</button></div>
-                          <div><button class='btn3' onclick='releaseDailyReport({$journalInProcess["journalId"]})'><i class='fas fa-upload'></i> Release</button></div>
-                      </div>";
-            }
-        } else {
-            echo "<button class='addReport' onclick='navigateTo(\"adddailyjournal\")'>Write your next daily report</button>";
-        }
-        if (count($arrayJournalIsReleased) > 0) {
-            echo "<h2>Released</h2>";
-            foreach ($arrayJournalIsReleased as $journalIsReleased) {
-                $date = date('dS M Y', strtotime($journalIsReleased['datum']));
-                echo "<div class='grid-container'>
-                          <div>Released on the $date</div>
-                      </div>";
-            }
-        }
-    } else {
-        echo "<h1>There are no reports</h1>";
-        echo "<button class='addReport' onclick='navigateTo(\"adddailyjournal\")'>Write your first Daily Report</button>";
-    }
-} else if ($_SESSION['role'] == 1) {
-    // Fachkraft view
-    // TODO: implement Fachkraft view
-}
-?>
+<div class="mb-6 flex items-center justify-between">
+    <p class="text-sm text-slate-500">Dokumentiere, woran du heute gearbeitet hast.</p>
+    <a href="adddailyjournal"
+       class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700">
+        <i class="fa-solid fa-plus"></i> Neuer Tagesbericht
+    </a>
+</div>
+
+<!-- Entwürfe -->
+<section class="mb-8">
+    <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <i class="fa-solid fa-pen-ruler"></i> Entwürfe
+        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500"><?= count($arrayJournalsInProcess) ?></span>
+    </h2>
+
+    <?php if (empty($arrayJournalsInProcess)): ?>
+        <div class="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+            Keine Entwürfe offen. <a href="adddailyjournal" class="font-medium text-brand-600 hover:text-brand-700">Neuen Tagesbericht schreiben</a>.
         </div>
-    </main>
+    <?php else: ?>
+        <ul class="space-y-3">
+            <?php foreach ($arrayJournalsInProcess as $r): ?>
+                <li class="rounded-xl border border-slate-200 bg-white p-4 shadow-card sm:p-5">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-slate-400"><?= e(formatDate($r['datum'])) ?></span>
+                                <?= statusBadge(0) ?>
+                            </div>
+                            <p class="mt-1.5 text-sm text-slate-600"><?= e(excerpt($r['text'], 180)) ?: '<span class="italic text-slate-400">Kein Text</span>' ?></p>
+                        </div>
+                        <div class="flex shrink-0 items-center gap-1">
+                            <a href="editDailyReport?id=<?= (int) $r['journalId'] ?>"
+                               class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100">
+                                <i class="fa-solid fa-pen"></i> Bearbeiten
+                            </a>
+                            <a href="releaseDailyReport?id=<?= (int) $r['journalId'] ?>"
+                               onclick="return confirm('Diesen Tagesbericht an die Fachkraft freigeben?')"
+                               class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-emerald-600 transition hover:bg-emerald-50">
+                                <i class="fa-solid fa-paper-plane"></i> Freigeben
+                            </a>
+                            <a href="deleteDailyReport?id=<?= (int) $r['journalId'] ?>"
+                               onclick="return confirm('Diesen Tagesbericht endgültig löschen?')"
+                               class="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600" title="Löschen">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+</section>
 
-    <script src="public/js/app.js"></script>
-    <script src="public/js/route.js"></script>
+<!-- Freigegeben -->
+<section>
+    <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <i class="fa-solid fa-circle-check"></i> Freigegeben
+        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500"><?= count($arrayJournalIsReleased) ?></span>
+    </h2>
 
-</body>
+    <?php if (empty($arrayJournalIsReleased)): ?>
+        <div class="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+            Noch nichts freigegeben. Gib einen Entwurf frei, damit ihn deine Fachkraft sieht.
+        </div>
+    <?php else: ?>
+        <ul class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-card">
+            <?php foreach ($arrayJournalIsReleased as $r): ?>
+                <li class="flex items-center gap-4 px-4 py-4 sm:px-5">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm text-slate-600"><?= e(excerpt($r['text'], 120)) ?: '<span class="italic text-slate-400">Kein Text</span>' ?></p>
+                    </div>
+                    <a href="seeDaily?id=<?= (int) $r['journalId'] ?>"
+                       class="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-brand-600 transition hover:bg-brand-50">
+                        Ansehen
+                    </a>
+                    <span class="hidden shrink-0 text-xs text-slate-400 sm:block"><?= e(formatDate($r['datum'])) ?></span>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+</section>
 
-</html>
+<?php require __DIR__ . '/../general/foot.php'; ?>

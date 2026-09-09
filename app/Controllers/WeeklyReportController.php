@@ -2,127 +2,104 @@
 
 class WeeklyReportController
 {
-    public function weeklyraport(){		
-		require_once 'app/Views/general/config.php';
+    public function weeklyraport()
+    {
+        requireRole([0]);
 
-		if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-			$WeeklyReport = new WeeklyReport();
-			
-			$arrayWeeklyInProcess = $WeeklyReport->getAllWeeklyInProcess()->fetchAll();
-			$arrayWeeklyIsReleased = $WeeklyReport->getAllWeeklyInRelease()->fetchAll();
+        $WeeklyReport = new WeeklyReport();
+        $arrayWeeklyInProcess  = $WeeklyReport->getAllWeeklyInProcess()->fetchAll(PDO::FETCH_ASSOC);
+        $arrayWeeklyIsReleased = $WeeklyReport->getAllWeeklyInRelease()->fetchAll(PDO::FETCH_ASSOC);
 
-			require 'app/Views/lernender/weeklyraport.view.php';
-		}else{
-			header("Location: login");
-		}
-	}
+        require 'app/Views/lernender/weeklyraport.view.php';
+    }
 
-	public function addweeklyjournal(){
-		require_once 'app/Views/general/config.php';
+    public function addweeklyjournal()
+    {
+        requireRole([0]);
 
-		// Redirect to login page if user is not logged in
-		if (!isset($_SESSION['access_token']) || empty($_SESSION['access_token'])) {
-			header("Location: login");
-			die();
-		}else{
-			$WeeklyReport = new WeeklyReport();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $calendar_week   = (int) post('calendar_week');
+            $completed_tasks = trim((string) post('completed_tasks'));
+            $still_in_work   = trim((string) post('still_in_work'));
+            $reflection      = trim((string) post('reflection'));
+            $issues          = trim((string) post('issues'));
 
-			if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-				$calendar_week = e(post('calendar_week'));
-				$completed_tasks = e(post('completed_tasks'));
-				$still_in_work = e(post('still_in_work'));
-				$reflection = e(post('reflection'));
-				$issues = e(post('issues'));
+            if ($calendar_week < 1 || $calendar_week > 53) {
+                setFlash('error', 'Bitte gib eine gültige Kalenderwoche (1–53) an.');
+                header('Location: addweeklyjournal');
+                exit;
+            }
 
-				$status = 0;
+            (new WeeklyReport())->add_weeklyraport($calendar_week, $completed_tasks, $still_in_work, $reflection, $issues, 0);
 
-				$WeeklyReport->add_weeklyraport($calendar_week, $completed_tasks, $still_in_work, $reflection, $issues, $status);
-	
-				header('Location: weeklyraport');
-			}
+            setFlash('success', 'Wochenbericht als Entwurf gespeichert.');
+            header('Location: weeklyraport');
+            exit;
+        }
 
-			require 'app/Views/lernender/addweeklyjournal.view.php';
-		}
-	}
+        require 'app/Views/lernender/addweeklyjournal.view.php';
+    }
 
-    public function editWeeklyRaport(){
-		require_once 'app/Views/general/config.php';
+    public function editWeeklyRaport()
+    {
+        requireRole([0]);
 
-		// Redirect to login page if user is not logged in
-		if (!isset($_SESSION['access_token']) || empty($_SESSION['access_token'])) {
-			header("Location: login");
-			die();
-		}else{
-			$id = $_GET['id'];
+        $id = (int) ($_GET['id'] ?? 0);
+        $WeeklyReport = new WeeklyReport();
 
-			$WeeklyReport = new WeeklyReport();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $calendar_week   = (int) post('calendar_week');
+            $completed_tasks = trim((string) post('completed_tasks'));
+            $still_in_work   = trim((string) post('still_in_work'));
+            $reflection      = trim((string) post('reflection'));
+            $issues          = trim((string) post('issues'));
 
-			if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-				$calendar_week = e(post('calendar_week'));
-				$completed_tasks = e(post('completed_tasks'));
-				$still_in_work = e(post('still_in_work'));
-				$reflection = e(post('reflection'));
-				$issues = e(post('issues'));
-			
-				$WeeklyReport->editWeeklyReport($calendar_week, $completed_tasks, $still_in_work, $reflection, $issues, $id);
+            $WeeklyReport->editWeeklyReport($calendar_week, $completed_tasks, $still_in_work, $reflection, $issues, $id);
 
-				header('Location: weeklyraport');	
-			}else{
-				/* Get Data to edit */
-				$getWeeklyReport = $WeeklyReport -> getWeeklyReport($id)->fetchAll();
-			}
-			require 'app/Views/lernender/editWeeklyJournal.view.php';
-		}
-	}
+            setFlash('success', 'Wochenbericht aktualisiert.');
+            header('Location: weeklyraport');
+            exit;
+        }
 
-	public function deleteWeeklyRaport(){
-		require_once 'app/Views/general/config.php';
+        $getWeeklyReport = $WeeklyReport->getWeeklyReport($id)->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($getWeeklyReport) || (int) $getWeeklyReport[0]['fk_benutzerId'] !== currentUserId()) {
+            setFlash('error', 'Dieser Wochenbericht wurde nicht gefunden.');
+            header('Location: weeklyraport');
+            exit;
+        }
 
-		// Redirect to login page if user is not logged in
-		if (!isset($_SESSION['access_token']) || empty($_SESSION['access_token'])) {
-			header("Location: login");
-			die();
-		}else{
-			$WeeklyReport = new WeeklyReport();
-			$pdo = connectDatabase();
-			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        require 'app/Views/lernender/editWeeklyJournal.view.php';
+    }
 
-			$id = $_GET['id'];
+    public function deleteWeeklyRaport()
+    {
+        requireRole([0]);
+        $id = (int) ($_GET['id'] ?? 0);
+        (new WeeklyReport())->deleteWeeklyReport($id);
 
-			$WeeklyReport->deleteWeeklyReport($id);
-			
-			header('Location: weeklyraport');
-		}
-	}
+        setFlash('success', 'Wochenbericht gelöscht.');
+        header('Location: weeklyraport');
+        exit;
+    }
 
-	public function releaseWeeklyReport(){
-		require_once 'app/Views/general/config.php';
+    public function releaseWeeklyReport()
+    {
+        requireRole([0]);
+        $id = (int) ($_GET['id'] ?? 0);
+        (new WeeklyReport())->releaseWeeklyReport($id);
 
-		// Redirect to login page if user is not logged in
-		if (!isset($_SESSION['access_token']) || empty($_SESSION['access_token'])) {
-			header("Location: login");
-			die();
-		}else{
-			$WeeklyReport = new WeeklyReport();
-			$pdo = connectDatabase();
-			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        setFlash('success', 'Wochenbericht an die Fachkraft freigegeben.');
+        header('Location: weeklyraport');
+        exit;
+    }
 
-			$id = $_GET['id'];
+    public function seeWeekly()
+    {
+        requireLogin();
+        $id = (int) ($_GET['id'] ?? 0);
 
-			$WeeklyReport->releaseWeeklyReport($id);
-			
-			header('Location: weeklyraport');
-		}
-	}
+        $weekArray = (new WeeklyReport())->seeWeekly($id)->fetchAll(PDO::FETCH_ASSOC);
 
-	public function seeWeekly(){
-		require_once 'app/Views/general/config.php';
-
-		$id = $_GET['id'];
-
-		$WeeklyReport = new WeeklyReport();
-		$WeeklyReport = $WeeklyReport->seeWeekly($id)->fetchAll();
-
-		require 'app/Views/lernender/seeWeekly.view.php';
-	}
+        require 'app/Views/fachkraft/seeWeekly.view.php';
+    }
 }

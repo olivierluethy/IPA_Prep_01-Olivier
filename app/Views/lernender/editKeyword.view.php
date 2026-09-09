@@ -1,35 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+$page = ['active' => 'keywords', 'title' => 'Keyword bearbeiten', 'icon' => 'fa-tags'];
+require __DIR__ . '/../general/head.php';
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="public/css/dailyweeklyreport.css">
-    <link rel="stylesheet" href="public/css/navside.css">
-    <link rel="stylesheet" href="public/fontawesome/css/all.css">
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <title>Journal - Edit Keyword</title>
-</head>
-
-<body>
-    <?php
-$actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
-include ("general/navside.view.php");
+$keyword = $getKeyword[0];
 ?>
 
-    <main>
-        <form action="editKeyword?id=<?= $getKeyword[0][0] ?>" method="POST">
-            <h2>Edit Keyword</h2>
-            <label for="title">Thema:</label><br>
-            <input type="text" id="title" name="thema" id="title" value="<?= $getKeyword[0][1] ?>"><br>
-            <input type="submit" class="" name="addTask" value="Edit Keyword"><br><br>
-        </form>
-    </main>
+<a href="keywords" class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-brand-600">
+    <i class="fa-solid fa-arrow-left"></i> Zurück zu den Keywords
+</a>
 
-    <script src="public/js/app.js"></script>
-    <script src="public/js/route.js"></script>
+<form action="editKeyword?id=<?= (int) $keyword['themaId'] ?>" method="POST" class="space-y-6">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+        <label for="thema" class="mb-1.5 block text-sm font-medium text-slate-700">Keyword</label>
+        <input type="text" name="thema" id="thema" required
+               value="<?= e($keyword['thema']) ?>"
+               placeholder="z. B. Kundengespräch"
+               class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+        <p class="mt-2 text-xs text-slate-400">Ein kurzer, prägnanter Begriff, dem du Berichte zuordnen kannst.</p>
+    </div>
 
-</body>
+    <div class="flex items-center justify-end gap-3">
+        <a href="keywords" class="rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100">Abbrechen</a>
+        <button type="submit"
+                class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700">
+            <i class="fa-solid fa-floppy-disk"></i> Änderungen speichern
+        </button>
+    </div>
+</form>
 
-</html>
+<?php require __DIR__ . '/../general/foot.php'; ?>

@@ -1,51 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+$page = ['active' => 'dailyraport', 'title' => 'Tagesbericht bearbeiten', 'icon' => 'fa-calendar-day'];
+require __DIR__ . '/../general/head.php';
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="public/css/dailyweeklyreport.css">
-    <link rel="stylesheet" href="public/css/navside.css">
-    <link rel="stylesheet" href="public/fontawesome/css/all.css">
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <title>Journal - Edit Daily Report</title>
-</head>
-
-<body>
-    <?php
-$actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
-include ("general/navside.view.php");
+$report      = $getDailyReport[0];
+$pickedIds   = array_column($getPickedKeywords ?? [], 'themaId');
 ?>
 
-    <main>
-        <form action="editDailyReport?id=<?= $getDailyReport[0][0] ?>" method="POST">
-            <h1>Edit Daily Report</h1>
-            <h2>Text:</h2><br>
-            <textarea name="text" id="text" cols="30" rows="10"
-                placeholder="For example: I have completed ..."><?php echo $getDailyReport[0][1] ?></textarea>
+<a href="dailyraport" class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-brand-600">
+    <i class="fa-solid fa-arrow-left"></i> Zurück zu den Tagesberichten
+</a>
 
-            <h2>Keywords:</h2>
-            <?php 
-            $pickedKeywordsIds = array_column($getPickedKeywords, 'themaId');
-            foreach ($getKeywords as $keyword) {
-                $checked = in_array($keyword['themaId'], $pickedKeywordsIds);
-                echo "<input type='checkbox' name='topics[]' id=" . $keyword['themaId'] . " " . ($checked ? "checked" : "") . " value=" . $keyword['themaId'] .">";
-                echo "<label for=" . $keyword['themaId'] . ">" . $keyword['thema'] . "</label>";
-            }
-            echo "<br><input type='submit'>";
-            ?>
-        </form>
-    </main>
+<form action="editDailyReport?id=<?= (int) $report['journalId'] ?>" method="POST" class="space-y-6">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+        <label for="editor_text" class="mb-2 block text-sm font-medium text-slate-700">
+            Woran hast du gearbeitet?
+        </label>
+        <textarea name="text" id="editor_text" rows="10"><?= richtext($report['text']) ?></textarea>
+        <p class="mt-2 text-xs text-slate-400">Beschreibe deine Tätigkeiten, was du gelernt hast und offene Punkte.</p>
+    </div>
 
-    <script src="public/js/app.js"></script>
-    <script src="public/js/route.js"></script>
-    <script src="ckeditor/ckeditor.js"></script>
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+        <h2 class="mb-1 text-sm font-medium text-slate-700">Keywords zuordnen</h2>
+        <p class="mb-4 text-xs text-slate-400">Ordne den Bericht deinen Themen zu (optional).</p>
 
-    <script>
-    CKEDITOR.replace('text');
-    </script>
+        <?php if (empty($getKeywords)): ?>
+            <div class="rounded-xl border border-dashed border-slate-300 p-5 text-center text-sm text-slate-500">
+                Du hast noch keine Keywords.
+                <a href="addkeyword" class="font-medium text-brand-600 hover:text-brand-700">Jetzt eines anlegen</a>.
+            </div>
+        <?php else: ?>
+            <div class="flex flex-wrap gap-2">
+                <?php foreach ($getKeywords as $topic): ?>
+                    <?php $checked = in_array($topic['themaId'], $pickedIds); ?>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" name="topics[]" value="<?= (int) $topic['themaId'] ?>" class="peer sr-only"<?= $checked ? ' checked' : '' ?>>
+                        <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 transition peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-checked:text-white hover:border-brand-300">
+                            <i class="fa-solid fa-tag text-xs"></i> <?= e($topic['thema']) ?>
+                        </span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
 
-</body>
+    <div class="flex items-center justify-end gap-3">
+        <a href="dailyraport" class="rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100">Abbrechen</a>
+        <button type="submit"
+                class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700">
+            <i class="fa-solid fa-floppy-disk"></i> Änderungen speichern
+        </button>
+    </div>
+</form>
 
-</html>
+<script src="ckeditor/ckeditor.js"></script>
+<script>
+    if (window.CKEDITOR) {
+        CKEDITOR.replace('editor_text', { height: 240, removePlugins: 'elementspath', resize_enabled: false });
+    }
+</script>
+
+<?php require __DIR__ . '/../general/foot.php'; ?>

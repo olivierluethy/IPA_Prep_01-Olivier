@@ -11,3 +11,5 @@ require 'app/Models/WeeklyReport.php';
 require 'app/Models/Fachkraft.php';
 require 'app/Models/Admin.php';
 require 'app/Models/Login.php';
+require 'app/Models/Profile.php';
+require 'app/Models/Search.php';

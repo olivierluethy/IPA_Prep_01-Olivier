@@ -1,138 +1,116 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+$page = ['active' => 'overview', 'title' => 'Übersicht', 'icon' => 'fa-layer-group'];
+require __DIR__ . '/../general/head.php';
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="public/css/dailyweeklyreport.css">
-    <link rel="stylesheet" href="public/css/navside.css">
-    <link rel="stylesheet" href="public/fontawesome/css/all.css">
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <title>Journal - Overview</title>
-</head>
-
-<body>
-
-<button id="burger" onclick="toggleSidebar()">&#9776;</button>
-
-    <?php
-$actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
-include(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "General" . DIRECTORY_SEPARATOR . "navside.view.php");
+$showDaily  = ($type === 'all' || $type === 'daily');
+$showWeekly = ($type === 'all' || $type === 'weekly');
 ?>
 
-<main>
-    <?php
-    if (count($arrayDailyRaports) > 0 || count($arrayWeeklyRaports) > 0): ?>
-        
-        <table class="order">
-            <tr>
-                <td>
-                    <h2>Sorted by:</h2>
-                </td>
-                <td>
-                    <!-- Choose sorting option -->
-                    <form action="" method="GET">
-                        
-                        <?php
-                        if(count($arrayLernende) > 0){
-                            echo "<select name='sort'>
-                            <option value=''>-- Employer --</option>";
-                            foreach($arrayLernende as $lernende){
-                                echo "<option value='" . $lernende["full_name"] . "'></option>";
-                            }
-                            echo "</select>";
-                        }
-                        ?>
+<p class="mb-6 text-sm text-slate-500">Alle freigegebenen Berichte deiner Lernenden auf einen Blick.</p>
 
-                        <select name="sort">
-                            <option value="">-- Date --</option>
-                            <option value="dateNewest"
-                                <?php if (isset($_GET['sort']) && $_GET['sort'] == "dateNewest"){ echo "selected"; }?>>
-                                Date Newest</option>
-                            <option value="dateOldest"
-                                <?php if (isset($_GET['sort']) && $_GET['sort'] == "dateOldest"){ echo "selected"; }?>>
-                                Date Oldest</option>
-                        </select>
+<!-- Filter -->
+<form action="overview" method="get" class="mb-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-card sm:p-5">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="flex-1">
+            <label for="q" class="mb-1.5 block text-sm font-medium text-slate-700">Suche</label>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="search" id="q" name="q" value="<?= e($q) ?>"
+                       placeholder="Nach Name oder Inhalt suchen…"
+                       class="w-full rounded-lg border border-slate-300 py-2.5 pl-10 pr-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+            </div>
+        </div>
+        <div class="sm:w-56">
+            <label for="type" class="mb-1.5 block text-sm font-medium text-slate-700">Berichtstyp</label>
+            <select id="type" name="type"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+                <option value="all"    <?= $type === 'all'    ? 'selected' : '' ?>>Alle Berichte</option>
+                <option value="daily"  <?= $type === 'daily'  ? 'selected' : '' ?>>Tagesberichte</option>
+                <option value="weekly" <?= $type === 'weekly' ? 'selected' : '' ?>>Wochenberichte</option>
+            </select>
+        </div>
+        <button type="submit"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700">
+            <i class="fa-solid fa-filter"></i> Filtern
+        </button>
+    </div>
+</form>
 
-                        <?php
-                        if(count($arrayTopics) > 0){
-                            echo "<select name='sort'>
-                                <option value=''>-- Topic --</option>";
-                                echo "<option value='" . $topic["thema"] . "'></option>";
-                                foreach($arrayTopics as $topic){
-                                    echo "<option value='" . $topic["thema"] . "'></option>";
-                                }
-                            echo "</select>";
-                        }
-                        ?>
+<?php if ($showDaily): ?>
+<!-- Tagesberichte -->
+<section class="mb-8">
+    <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <i class="fa-solid fa-calendar-day"></i> Tagesberichte
+        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500"><?= count($arrayDailyRaports) ?></span>
+    </h2>
 
-                        <select name="sort">
-                            <option value="">-- Wochen / Journal --</option>
-                            <option value="dateNewest"
-                                <?php if (isset($_GET['sort']) && $_GET['sort'] == "dateNewest"){ echo "selected"; }?>>
-                                Date Newest</option>
-                            <option value="dateOldest"
-                                <?php if (isset($_GET['sort']) && $_GET['sort'] == "dateOldest"){ echo "selected"; }?>>
-                                Date Oldest</option>
-                        </select>
-                        <button title='Sort all tasks' type='submit'>Sort <i class='fa fa-sort'></i></button>
-                    </form>
-                </td>
-            </tr>
-        </table>
-<?php
-            $sort_option = "datum DESC";
-            if (isset($_GET['sort']))
-            {
-                if ($_GET['sort'] == "dateNewest")
-                {
-                    $sort_option = "datum ASC";
-                }
-                else if ($_GET['sort'] == "dateOldest")
-                {
-                    $sort_option = "datum DESC";
-                }
-            }
+    <?php if (empty($arrayDailyRaports)): ?>
+        <div class="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+            Keine Berichte gefunden.
+        </div>
+    <?php else: ?>
+        <ul class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-card">
+            <?php foreach ($arrayDailyRaports as $r): ?>
+                <li class="flex items-center gap-4 px-4 py-4 transition hover:bg-slate-50 sm:px-5">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                        <i class="fa-solid fa-calendar-day"></i>
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <p class="truncate font-medium text-ink"><?= e($r['full_name'] ?? '') ?></p>
+                            <span class="shrink-0 text-xs text-slate-400"><?= e(formatDate($r['datum'] ?? '')) ?></span>
+                        </div>
+                        <p class="mt-0.5 truncate text-sm text-slate-600"><?= e(excerpt((string) ($r['text'] ?? ''), 120)) ?: '<span class="italic text-slate-400">Kein Text</span>' ?></p>
+                    </div>
+                    <a href="seeDaily?id=<?= (int) $r['journalId'] ?>"
+                       class="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-brand-600 transition hover:bg-brand-50">
+                        Ansehen <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+</section>
+<?php endif; ?>
 
-            // $fachkraft = new Fachkraft();
-            // $getObjects = $fachkraft->sortTask($sort_option);
-            // $getObjects = $getObjects->fetchAll();
+<?php if ($showWeekly): ?>
+<!-- Wochenberichte -->
+<section>
+    <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <i class="fa-solid fa-calendar-week"></i> Wochenberichte
+        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500"><?= count($arrayWeeklyRaports) ?></span>
+    </h2>
 
+    <?php if (empty($arrayWeeklyRaports)): ?>
+        <div class="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+            Keine Berichte gefunden.
+        </div>
+    <?php else: ?>
+        <ul class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-card">
+            <?php foreach ($arrayWeeklyRaports as $r): ?>
+                <li class="flex items-center gap-4 px-4 py-4 transition hover:bg-slate-50 sm:px-5">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                        <i class="fa-solid fa-calendar-week"></i>
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <p class="truncate font-medium text-ink"><?= e($r['full_name'] ?? '') ?></p>
+                            <span class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-600">KW <?= (int) ($r['kalenderwoche'] ?? 0) ?></span>
+                            <span class="shrink-0 text-xs text-slate-400"><?= e(formatDate($r['datum'] ?? '')) ?></span>
+                        </div>
+                        <?php if (!empty($r['reflexion'])): ?>
+                            <p class="mt-0.5 truncate text-sm text-slate-600"><?= e(excerpt((string) $r['reflexion'], 120)) ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <a href="seeWeekly?id=<?= (int) $r['wochenreportId'] ?>"
+                       class="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-brand-600 transition hover:bg-brand-50">
+                        Ansehen <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+</section>
+<?php endif; ?>
 
-        if($dailyRaportsAmount > 0): ?>
-            <h2>Daily reports</h2>
-            <?php
-            foreach($arrayDailyRaports as $dailyreports):
-                $date = date('dS M Y', strtotime($dailyreports['datum']));
-                ?>
-                <div class='grid-container'>
-                    <div><?php echo "Report from " . $dailyreports['full_name'] . " written on the " . $date; ?></div>
-                    <div><button class='btn1' onclick='seeDaily(<?php echo $dailyreports['journalId']; ?>)'><i class='fas fa-eye'></i> See</button></div>
-                </div>
-            <?php endforeach;
-        endif;
-        if($weeklyraportsAmount > 0): ?>
-            <h2>Weekly reports</h2>
-            <?php
-            foreach($arrayWeeklyRaports as $weeklyraports):
-                $date = date('dS M Y', strtotime($weeklyraports['datum']));
-                ?>
-                <div class='grid-container'>
-                    <div><?php echo "Report from " . $weeklyraports['full_name'] . " written on the " . $date; ?></div>
-                    <div><button class='btn1' onclick='seeWeekly(<?php echo $weeklyraports['wochenreportId']; ?>)'><i class='fas fa-eye'></i> See</button></div>
-                </div>
-            <?php endforeach;
-        endif;
-    else:
-        echo "<h1>There're no reports available</h1>";
-    endif;
-    ?>
-</main>
-
-    <script src="public/js/app.js"></script>
-    <script src="public/js/route.js"></script>
-
-</body>
-
-</html>
+<?php require __DIR__ . '/../general/foot.php'; ?>

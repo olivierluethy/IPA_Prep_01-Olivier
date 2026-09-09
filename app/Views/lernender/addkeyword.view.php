@@ -1,35 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="public/css/dailyweeklyreport.css">
-    <link rel="stylesheet" href="public/css/navside.css">
-    <link rel="stylesheet" href="public/fontawesome/css/all.css">
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <title>Journal - Add Keyword</title>
-</head>
-
-<body>
-    <?php
-$actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
-include(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "General" . DIRECTORY_SEPARATOR . "navside.view.php");
+<?php
+$page = ['active' => 'keywords', 'title' => 'Neues Keyword', 'icon' => 'fa-tags'];
+require __DIR__ . '/../general/head.php';
 ?>
 
-    <main>
-        <form action="addkeyword" method="POST">
-            <h2>Thema:</h2>
-            <input type="text" name="thema" id="thema"><br><br><br><br>
-            <input type="submit" title="Click to add a keyword" class="send" value="+ Add Keyword">
-        </form>
-    </main>
+<a href="keywords" class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-brand-600">
+    <i class="fa-solid fa-arrow-left"></i> Zurück zu den Keywords
+</a>
 
-    <script src="public/js/app.js"></script>
-    <script src="public/js/route.js"></script>
-    <script src="ckeditor/ckeditor.js"></script>
+<form action="addkeyword" method="POST" class="space-y-6">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+        <label for="thema" class="mb-1.5 block text-sm font-medium text-slate-700">Keyword</label>
+        <input type="text" name="thema" id="thema" required
+               placeholder="z. B. Kundengespräch"
+               class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+        <p class="mt-2 text-xs text-slate-400">Ein kurzer, prägnanter Begriff, dem du Berichte zuordnen kannst.</p>
+    </div>
 
-</body>
+    <div class="flex items-center justify-end gap-3">
+        <a href="keywords" class="rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100">Abbrechen</a>
+        <button type="submit"
+                class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700">
+            <i class="fa-solid fa-plus"></i> Keyword hinzufügen
+        </button>
+    </div>
+</form>
 
-</html>
+<?php require __DIR__ . '/../general/foot.php'; ?>

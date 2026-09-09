@@ -37,6 +37,14 @@ $routes = [
 	/* Für Admin */
 	'useroverview' => 'AdminController@useroverview',
 
+	/* Profil & Einstellungen */
+	'profile' => 'ProfileController@profile',
+	'updateProfile' => 'ProfileController@updateProfile',
+	'updatePassword' => 'ProfileController@updatePassword',
+
+	/* Suche */
+	'search' => 'SearchController@search',
+
 	/* Für alle */
 	'logout' => 'LoginController@logout',
 	'login' => 'LoginController@login',
@@ -44,9 +52,6 @@ $routes = [
 	/* Normale E-Mail/Passwort-Anmeldung */
 	'register' => 'LoginController@register',
 	'authenticate' => 'LoginController@authenticate',
-
-	'addUser' => 'LoginController@addUser',
-	'doesUserExist' => 'LoginController@doesUserExist',
 ];
 
 $db = [
