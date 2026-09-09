@@ -1,5 +1,8 @@
 vendor/
 
+# Lokale Zugangsdaten / Secrets (nicht versionieren)
+app/Views/general/secrets.local.php
+
 # Lokaler Dev-Router für den PHP-Built-in-Server (kein Teil der App)
 _dev_router.php
 
